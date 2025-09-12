@@ -70598,5 +70598,5 @@ payload_writer[70421] = 0x34373462;
 payload_writer[70422] = 0x64393365;
 payload_writer[70423] = 0x61303736;
 p.fcall(payload_buffer);
-window.progress.innerHTML="<div>GoldHEN V2.4 Loaded</div>";
+window.progress.innerHTML="<div>GoldHEN V2.4 Loaded ✓</div>";
 }
