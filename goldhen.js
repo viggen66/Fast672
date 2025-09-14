@@ -171,8 +171,8 @@ var stagegold = function () {
 
 		return retv;
 	}
-		var payload_buffer = p.syscall(477, 0, 0x300000, 7, 0x41000, -1, 0);
-        var payload_writer = p.arrayFromAddress(payload_buffer, 0xC0000);
+		var payload_buffer = p.syscall(477, 0, 0x46000, 7, 0x41000, -1, 0);
+        var payload_writer = p.arrayFromAddress(payload_buffer, 0x11800);
 payload_writer[0] = 0x001066E9;
 payload_writer[1] = 0x1E0FF300;
 payload_writer[2] = 0x04BA55FA;

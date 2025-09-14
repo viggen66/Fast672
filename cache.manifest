@@ -1,11 +1,12 @@
 CACHE MANIFEST 
 # v0.0.4 Self-Host 
 
-index.html
-goldhen.js
-goldhen1.js
+disableupdates.bin
 expl.js
 exploit.js
+goldhen.js
+goldhen1.js
+index.html
+jb.js
 rop.js
 syscalls.js
-jb.js

@@ -33,7 +33,8 @@
         padding: 25px 20px;
         border-radius: 8px 8px 0 0;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.8);
-        margin-bottom: 30px;
+        margin-top: 10px;
+		margin-bottom: 30px;
         border-bottom: 1px solid #1e3a5f;
     }
     
@@ -193,8 +194,8 @@ var leaker_obj={a:0};var leaker_arr=new Uint32Array(6);var oob_slave=new Uint8Ar
 window.applicationCache.ondownloading=function(){document.getElementById("progress").innerHTML="Page Caching Started!!"};
 window.applicationCache.onprogress=function(a){document.getElementById("progress").innerHTML="Caching Status: "+(Math.round(100*(a.loaded/a.total)))+"% Completed"};
 window.applicationCache.oncached=function(){document.getElementById("progress").innerHTML="Page Cached Successfully!!";setTimeout(function(){document.getElementById("progress").innerHTML="Turn Off the Internet & Reopen the Browser!!"; }, 1500);};
-window.applicationCache.onnoupdate=function(){jailbreak();p.write8(0, 0); gc();};
-window.applicationCache.onerror=function(){jailbreak();p.write8(0, 0); gc();};
+window.applicationCache.onnoupdate=function(){jailbreak();p.write8(0, 0);};
+window.applicationCache.onerror=function(){jailbreak();p.write8(0, 0);};
 </script>
 </head>
 <body>
@@ -202,11 +203,9 @@ window.applicationCache.onerror=function(){jailbreak();p.write8(0, 0); gc();};
     <div class="header">
         <h1>PS4 6.72 EXPLOIT MENU - 2025</h1>
     </div>
-    <br>
     <div class="status-message">
         <h1 id="progress">Ready to load exploit</h1>
     </div>
-	<br><br>
         <div class="card">
             <h2>GOLDHEN PAYLOADS</h2>
 			<br>
@@ -215,13 +214,24 @@ window.applicationCache.onerror=function(){jailbreak();p.write8(0, 0); gc();};
                 <button onclick="gold1(); return false" class="secondary">Load GoldHEN 2.4b</button>
             </div>
         </div>
-    </div>
-    
+        <div class="card">
+            <h2>PAYLOADS</h2>
+			<br>
+            <div class="button-group">
+                <button class="tertiary" onclick="loadPayload(payloadFiles.disableUpdates); return false">Disable Updates</button>
+            </div>
+        </div>
+		
     <div class="footer">
         PS4 6.72 Exploit Host - 2025 Edition
     </div>
 </div>
-
+<script>
+let bigArray = null;
+function allocate() {
+   bigArray = new Array(10_000_000).fill(42);
+}
+</script>
 <script>
 function gold() {
 progress.innerHTML="<div>Loading GoldHen 2.3 ...</div>";
@@ -244,6 +254,49 @@ try {
 		alert(e);
 	}
 }    
+
+const payloadFiles = {
+    disableUpdates: "disableupdates.bin",
+};
+
+function getPayload(payload, onLoadEndCallback) {
+    const req = new XMLHttpRequest();
+    req.open("GET", payload);
+    req.responseType = "arraybuffer";
+    req.onload = (event) => onLoadEndCallback && onLoadEndCallback(req, event);
+    req.send();
+}
+
+function sendPayload(url, data, onLoadEndCallback) {
+    const req = new XMLHttpRequest();
+    req.open("POST", url, true);
+    req.onload = (event) => onLoadEndCallback && onLoadEndCallback(req, event);
+    req.send(data);
+}
+
+function loadPayload(file) {
+    const statusUrl = "http://127.0.0.1:9090/status";
+    const payloadUrl = "http://127.0.0.1:9090";
+    const req = new XMLHttpRequest();
+    req.open("POST", statusUrl);
+    req.onerror = () => alert("Cannot Load Payload Because The BinLoader Server Is Not Running");
+    req.onload = () => {
+      const responseJson = JSON.parse(req.responseText);
+      if (responseJson.status === "ready") {
+        getPayload(file, (req) => {
+          if ((req.status === 200 || req.status === 304) && req.response) {
+            sendPayload(payloadUrl, req.response, (req) => {
+              progress.innerHTML = req.status === 200 ? "Payload Loaded ✓" : "Cannot send payload";
+            });
+          }
+        });
+      } else {
+        alert("Cannot Load Payload Because The BinLoader Server Is Busy");
+      }
+    };
+    req.send();
+}
+
 </script>
 
 <script src="./rop.js"></script>
