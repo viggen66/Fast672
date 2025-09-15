@@ -194,8 +194,8 @@ var leaker_obj={a:0};var leaker_arr=new Uint32Array(6);var oob_slave=new Uint8Ar
 window.applicationCache.ondownloading=function(){document.getElementById("progress").innerHTML="Page Caching Started!!"};
 window.applicationCache.onprogress=function(a){document.getElementById("progress").innerHTML="Caching Status: "+(Math.round(100*(a.loaded/a.total)))+"% Completed"};
 window.applicationCache.oncached=function(){document.getElementById("progress").innerHTML="Page Cached Successfully!!";setTimeout(function(){document.getElementById("progress").innerHTML="Turn Off the Internet & Reopen the Browser!!"; }, 1500);};
-window.applicationCache.onnoupdate=function(){jailbreak();p.write8(0, 0);};
-window.applicationCache.onerror=function(){jailbreak();p.write8(0, 0);};
+window.applicationCache.onnoupdate=function(){setTimeout(function(){jailbreak(); p.write8(0, 0);},500);};
+window.applicationCache.onerror=function(){setTimeout(function(){jailbreak(); p.write8(0, 0);},500);};
 </script>
 </head>
 <body>
@@ -204,7 +204,7 @@ window.applicationCache.onerror=function(){jailbreak();p.write8(0, 0);};
         <h1>PS4 6.72 EXPLOIT MENU - 2025</h1>
     </div>
     <div class="status-message">
-        <h1 id="progress">Ready to load exploit</h1>
+        <h1 id="progress">Initialize</h1>
     </div>
         <div class="card">
             <h2>GOLDHEN PAYLOADS</h2>
@@ -299,13 +299,13 @@ function loadPayload(file) {
 
 </script>
 
-<script src="./rop.js"></script>
-<script src="./syscalls.js"></script>
-<script src="./expl.js"></script>
-<script src="./exploit.js"></script>
-<script src="./goldhen.js"></script>
-<script src="./goldhen1.js"></script> 
-<script src="./jb.js"></script>
+<script src="./rop.js" defer></script>
+<script src="./syscalls.js" defer></script>
+<script src="./expl.js" defer></script>
+<script src="./jb.js" defer></script>
+<script src="./exploit.js" defer></script>
+<script src="./goldhen.js" defer></script> 
+<script src="./goldhen1.js" defer></script> 
 
 <pre id="console"></pre>
 </body>
