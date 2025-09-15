@@ -23,7 +23,7 @@ var stagegold = function () {
 	};
 
 	p.malloc = function malloc(sz) {
-		var backing = new Uint8Array(0x10000 + sz);
+		var backing = new Uint8Array(sz);
 		window.nogc.push(backing);
 		var ptr = p.read8(p.leakval(backing).add32(0x10));
 		ptr.backing = backing;
@@ -31,7 +31,7 @@ var stagegold = function () {
 	}
 
 	p.malloc32 = function malloc32(sz) {
-		var backing = new Uint8Array(0x10000 + sz * 4);
+		var backing = new Uint8Array(sz * 4);
 		window.nogc.push(backing);
 		var ptr = p.read8(p.leakval(backing).add32(0x10));
 		ptr.backing = new Uint32Array(backing.buffer);
