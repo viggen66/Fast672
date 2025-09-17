@@ -294,7 +294,7 @@ window.applicationCache.onerror=function(){setTimeout(function(){jailbreak(); p.
 <script>
 let bigArray = null;
 function allocate() {
-   bigArray = new Array(2_000_000).fill(undefined);
+   bigArray = new Array(1_600_000).fill(undefined);
 }
 </script>
 <script>
@@ -356,7 +356,7 @@ function checkAutoLoad() {
     // Check if the toggle was previously set to on
     if (localStorage.getItem('autoLoadGoldHEN') === 'true') {
         document.getElementById('autoLoadToggle').checked = true;
-        setTimeout(gold, 2500);
+        setTimeout(gold, 2000);
     }
 }
 
@@ -364,7 +364,7 @@ function checkAutoLoad() {
 document.getElementById('autoLoadToggle').addEventListener('change', function() {
     localStorage.setItem('autoLoadGoldHEN', this.checked);
     if (this.checked) {
-        setTimeout(gold, 2500);
+        setTimeout(gold, 2000);
     }
 });
 

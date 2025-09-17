@@ -115,7 +115,7 @@ function int64(low, hi) {
     return this;
 }
 
-var STRUCTURE_SPRAY_SIZE = 0x1800;
+var STRUCTURE_SPRAY_SIZE = 0x600;
 
 var g_confuse_obj = null;
 var g_arb_master = null;
