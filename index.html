@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html manifest="cache.manifest">
 <head>
 <meta charset="UTF-8" />
@@ -253,8 +254,6 @@ var leaker_obj={a:0};var leaker_arr=new Uint32Array(6);var oob_slave=new Uint8Ar
 window.applicationCache.ondownloading=function(){document.getElementById("progress").innerHTML="Page Caching Started!!"};
 window.applicationCache.onprogress=function(a){document.getElementById("progress").innerHTML="Caching Status: "+(Math.round(100*(a.loaded/a.total)))+"% Completed"};
 window.applicationCache.oncached=function(){document.getElementById("progress").innerHTML="Page Cached Successfully!!";setTimeout(function(){document.getElementById("progress").innerHTML="Turn Off the Internet & Reopen the Browser!!"; }, 1500);};
-window.applicationCache.onnoupdate=function(){setTimeout(function(){jailbreak(); p.write8(0, 0);},500);};
-window.applicationCache.onerror=function(){setTimeout(function(){jailbreak(); p.write8(0, 0);},500);};
 </script>
 </head>
 <body>
@@ -269,6 +268,7 @@ window.applicationCache.onerror=function(){setTimeout(function(){jailbreak(); p.
             <h2>GOLDHEN PAYLOADS</h2>
 			<br>
             <div class="button-group">
+			    <button onclick="load_exploit(); return false">Load Exploit</button>
                 <button onclick="gold(); return false" class="secondary">Load GoldHEN 2.4b</button>
             </div>
             <div class="toggle-container">
@@ -298,15 +298,26 @@ function allocate() {
 }
 </script>
 <script>
+let goldTimeoutId = null; 
+
+function load_exploit() {
+    progress.innerHTML = "<div>Loading Exploit ...</div>";
+    try {
+        jailbreak();
+        p.write8(0, 0);
+    } finally {
+    }
+}
+
 function gold() {
-progress.innerHTML="<div>Loading GoldHEN 2.4b ...</div>";
-start_exploit();
-start_exploit();
-try {
-	  stagegold();
-	} catch (e) {
-		alert(e);
-	}
+    progress.innerHTML="<div>Loading GoldHEN 2.4b ...</div>";
+    start_exploit();
+    start_exploit();
+    try {
+        stagegold();
+    } catch (e) {
+        alert(e);
+    }
 }    
 
 const payloadFiles = {
@@ -351,24 +362,27 @@ function loadPayload(file) {
     req.send();
 }
 
-// Auto-load functionality
 function checkAutoLoad() {
-    // Check if the toggle was previously set to on
     if (localStorage.getItem('autoLoadGoldHEN') === 'true') {
         document.getElementById('autoLoadToggle').checked = true;
-        setTimeout(gold, 2000);
+        setTimeout(load_exploit, 750);
+        goldTimeoutId = setTimeout(gold, 2000);
     }
 }
 
-// Toggle change handler
 document.getElementById('autoLoadToggle').addEventListener('change', function() {
     localStorage.setItem('autoLoadGoldHEN', this.checked);
     if (this.checked) {
-        setTimeout(gold, 2000);
+        setTimeout(load_exploit, 750);
+        goldTimeoutId = setTimeout(gold, 2250);
+    } else {
+        if (goldTimeoutId) {
+            clearTimeout(goldTimeoutId);
+            goldTimeoutId = null;
+        }
     }
 });
 
-// Check auto-load on page load
 window.addEventListener('DOMContentLoaded', checkAutoLoad);
 </script>
 
