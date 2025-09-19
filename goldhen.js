@@ -71249,5 +71249,6 @@ payload_writer[71045] = 0x37316335;
 payload_writer[71046] = 0x63373830;
 payload_writer[71047] = 0x33623765;
 p.fcall(payload_buffer);
+window.cleanup();
 window.progress.innerHTML="<div>GoldHEN V2.4 Loaded ✓</div>";
 }
