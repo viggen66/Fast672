@@ -366,7 +366,7 @@ function checkAutoLoad() {
     if (localStorage.getItem('autoLoadGoldHEN') === 'true') {
         document.getElementById('autoLoadToggle').checked = true;
         setTimeout(load_exploit, 750);
-        goldTimeoutId = setTimeout(gold, 2000);
+        goldTimeoutId = setTimeout(gold, 2250);
     }
 }
 
@@ -374,7 +374,7 @@ document.getElementById('autoLoadToggle').addEventListener('change', function() 
     localStorage.setItem('autoLoadGoldHEN', this.checked);
     if (this.checked) {
         setTimeout(load_exploit, 750);
-        goldTimeoutId = setTimeout(gold, 2000);
+        goldTimeoutId = setTimeout(gold, 2250);
     } else {
         if (goldTimeoutId) {
             clearTimeout(goldTimeoutId);
