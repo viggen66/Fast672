@@ -307,7 +307,7 @@ var stagegold = function () {
 	}
 
 	p.fcall(payload_buffer);
-	window.progress.innerHTML="<div>GoldHEN V2.4b Loaded ✓</div>";
+	document.getElementById('msgs').innerHTML = "<div>GoldHEN V2.4b Loaded ✓</div>";
 	window.chain = null;
     window.nogc = [];
 }
