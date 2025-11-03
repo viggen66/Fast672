@@ -295,36 +295,54 @@ var stagegold = function () {
 		return retv;
 	};
 	
-	// Memory stability enhancements
+	// Cleanup function
 	p.cleanup = function() {
-		// Restore original kernel view buffer
-		p.write8(kstr, orig_kview_buf);
+		if (kstr && orig_kview_buf) {
+			p.write8(kstr, orig_kview_buf);
+		}
 		
-		// Clear temporary references
+		if (textAreaVtPtr && textAreaVtable) {
+			p.write8(textAreaVtPtr, textAreaVtable);
+		}
+		
 		dview32 = null;
 		dview8 = null;
 		kview = null;
+		textArea = null;
 		
-		// Force garbage collection hint
+		window.gadgets = null;
+		window.gadgets2 = null;
+		window.stableRefs = null;
+		window.libSceLibcInternalBase = null;
+		window.libKernelBase = null;
+		
+		if (window.nogc) {
+			window.nogc.length = 0;
+		}
+		if (nogcArray) {
+			nogcArray.length = 0;
+		}
+		
+		window.chain = null;
+		window.syscalls = {};
+		
 		if (window.gc) {
 			window.gc();
 		}
+		
+		return true;
 	};
 	
-	// Memory pressure monitoring
 	p.checkMemory = function() {
 		try {
-			// Allocate small test buffer to verify memory availability
 			var testBuf = new Uint8Array(0x1000);
 			nogcArray.push(testBuf);
 			return true;
 		} catch(e) {
-
 			return false;
 		}
 	};
 	
-	// Ensure stable references are maintained
 	window.stableRefs = {
 		webkit: webKitBase,
 		libkernel: libKernelBase,
@@ -333,17 +351,14 @@ var stagegold = function () {
 		kstr: kstr
 	};
 	
-	// Memory barrier - ensure all writes complete
 	p.memoryBarrier = function() {
 		// Read back critical pointers to ensure memory coherency
 		var verify = p.read8(textAreaVtPtr);
 		return verify;
 	};
 	
-	// Export spawn_thread to window for external access
 	window.spawn_thread = spawn_thread;
 	
-	// Final stability check
 	p.memoryBarrier();
 	
 	
@@ -364,6 +379,26 @@ var stagegold = function () {
 
 	p.fcall(payload_buffer);
 	document.getElementById('msgs').innerHTML = "<div>GoldHEN Loaded ✓</div>";
-	window.chain = null;
-    window.nogc = [];
+	
+	p.cleanup();
+	
+	payload_writer = null;
+	payload_buffer = null;
+	payload_uint32 = null;
+	
+	if (textArea) {
+		textArea.onclick = null;
+		textArea.onfocus = null;
+		textArea.onblur = null;
+	}
+	
+	cachedGadgets = null;
+	syscallsCache = null;
+	nogcArray = null;
+	
+	if (window.gc) {
+		setTimeout(function() {
+			window.gc();
+		}, 1000);
+	}
 }
