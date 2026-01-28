@@ -380,11 +380,8 @@ var stagegold = function () {
 	p.fcall(payload_buffer);
 	document.getElementById('msgs').innerHTML = "<div>GoldHEN Loaded ✓</div>";
 	
-	p.cleanup();
-	
-	payload_writer = null;
-	payload_buffer = null;
-	payload_uint32 = null;
+    payload_writer = null;
+    payload_buffer = null;
+    payload_uint32 = null;
 
 }
-
