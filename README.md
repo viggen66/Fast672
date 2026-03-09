@@ -1,4 +1,4 @@
-New test for Fast672 Webhost, with direct GoldHen load without use Mira-Loader, making the fastest webhost for 6.72
+Newer Host for Fast672 Webhost, with direct GoldHen load without use Mira-Loader, making the fastest webhost for 6.72
 
 https://viggen66.github.io/Fast672/
 
