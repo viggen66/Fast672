@@ -1,12 +1,14 @@
+
+
+## Overview
+
+A browser-based JavaScript project designed to support **GoldHEN payload loading** in compatible PlayStation environments. It combines memory access primitives, runtime address resolution, and native execution infrastructure.
+
 Newer Host for Fast672 Webhost, with direct GoldHen load without use Mira-Loader, making the fastest webhost for 6.72
 
 https://viggen66.github.io/Fast672/
 
 The way the exploit is triggled, enabling webkit exploit on load, it can happen OOM when caching the webhost to the console, just repeat until cache is done with success.
-
-## Overview
-
-A browser-based JavaScript project designed to support **GoldHEN payload loading** in compatible PlayStation environments. It combines memory access primitives, runtime address resolution, and native execution infrastructure.
 
 ## Key Features
 - **Memory access:** Arbitrary memory read/write operations and JavaScript object address discovery.
