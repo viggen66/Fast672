@@ -4,7 +4,25 @@ https://viggen66.github.io/Fast672/
 
 The way the exploit is triggled, enabling webkit exploit on load, it can happen OOM when caching the webhost to the console, just repeat until cache is done with success.
 
-This is the fastest webhost for firmware 6.72 with latest GoldHEN version
+Overview
+
+A browser-based JavaScript project designed to support GoldHEN payload loading in compatible PlayStation environments. It combines memory access primitives, runtime address resolution, and native execution infrastructure.
+
+Key Features
+
+Memory access: Arbitrary memory read/write operations and JavaScript object address discovery.
+Runtime address resolution: Resolves WebKit and system library bases using predefined offsets.
+ROP execution: Prepares return-oriented programming chains and native function calls.
+Automatic syscall discovery: Identifies syscall entry points within system library memory.
+Payload loading: Provides logic to copy an embedded payload into allocated memory and invoke it.
+Post-execution cleanup: Restores selected modified pointers and clears temporary references.
+Performance and Memory Management
+
+Uses typed arrays, reusable buffers, and cached references to reduce repeated allocations and property lookups. Cleanup routines help manage temporary objects after execution. Performance and stability require validation on the target environment.
+
+Compatibility and Requirements
+
+Compatibility depends on the browser, firmware version, and configured offsets. A supporting ROP implementation and a complete GoldHEN payload are required.
 
 <img width="1537" height="759" alt="image" src="https://github.com/user-attachments/assets/8b77393f-be6e-41ba-8010-41c10e3d0103" />
 
