@@ -299,7 +299,7 @@ var stagegold = function () {
         var n = nogcArray.length;
         for (var i = 0; i < n; i++) {
             if (nogcArray[i] === b) {
-                // remove sem criar buraco grande: swap com o último
+                // remove without creating a large gap: swap with the last element
                 nogcArray[i] = nogcArray[n - 1];
                 nogcArray.length = n - 1;
                 break;
