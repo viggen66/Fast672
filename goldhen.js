@@ -328,14 +328,13 @@ var stagegold = function () {
 
         pWrite8(contextStack, new_thr.stack);
 
-        // O nome é criado UMA vez, não a cada retv()
         var namePtr = p.stringify(name);
 
         var retv = function () {
             var r = pFcall(pthreadCreateAddr, contextThreadId, 0,
                            longJmpAddr, contextBase, namePtr);
-            // pthread_create copiou o nome; podemos libertar o buffer.
-            // Só libertar APÓS o retorno, nunca antes.
+            // pthread_create has copied the name; we can free the buffer.
+            // Release it only AFTER the return, never before.
             p.freeString(namePtr);
             return r;
         };
